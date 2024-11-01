@@ -1,0 +1,55 @@
+/* Interface for the HorseStore contract */
+#define function updateHorseNumber(uint256) nonpayable returns()
+#define function readNumberOfHorses() view returns(uint256)
+
+#define constant NUMBER_OF_HORSES_STORAGE_SLOT = FREE_STORAGE_POINTER()
+
+#define macro MAIN() = takes(0) returns (0) {
+    0x00 // push 0 on the stack [0]
+    calldataload //[calldata]
+    push1 0xe0 // push 224 (bits) on the stack [224, calldata]
+    shr // shift right 224 bits [calldata >> 224 to get function selector]
+    
+    dup1 // [calldata >> 224, calldata >> 224]
+    __FUNC_SIG(updateHorseNumber) // push 0xcdfead2e on the stack [0xcdfead2e, fs,fs]
+    eq // [1/0,fs]
+    updateJump // [update_horses pc, true/false, fs]
+    jumpi
+    
+    push4 0xe026c017 // push 0xcdfead2e on the stack [0xe026c017, fs]
+    eq // [1/0]
+    readJump // [update_horses pc, true/false]
+    jumpi //[]
+
+    0x00 0x00 revert
+
+    updateJump:
+        SET_NUMBER_OF_HORSES()
+    
+    readJump:
+        GET_NUMBER_OF_HORSES()
+    
+}
+
+// #define macro SET_NUMBER_OF_HORSES() = takes (0) returns (0) {
+//     0x04 calldataload   // [value]
+//     [NUMBER_OF_HORSES_LOCATION]    // [ptr, value]
+//     sstore              // []
+//     stop
+// }
+
+ #define macro SET_NUMBER_OF_HORSES() = takes(0) returns (0) {
+    0x04 calldataload  // [calldata - func_selector]
+    [NUMBER_OF_HORSES_STORAGE_SLOT]
+    sstore
+    stop
+ }
+ #define macro GET_NUMBER_OF_HORSES() = takes(0) returns (0) {
+    [NUMBER_OF_HORSES_STORAGE_SLOT]
+    sload
+    0x00
+    mstore // [] //Memory: [value]
+    0x20 // equal to 32 bytes
+    0x00
+    return 
+ }
