@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {Test, console2} from "forge-std/Test.sol";
+// import {console} from"forge-std/console.sol";
 import {NftMarketplace} from "src/NftMarketplace.sol";
 import {NftMock} from "./mocks/NftMock.sol";
 import {INftMarketplace} from "src/INftMarketplace.sol";
@@ -221,6 +222,20 @@ abstract contract BaseTest is Test {
 
         uint256 badTokenId = 1;
 
+        console2.logString("HELLO");
+        console2.logBytes4(NftMarketplace.NftMarketplace__NotListed.selector);
+
+        bytes memory expectedRevert = abi.encodeWithSelector(NftMarketplace.NftMarketplace__NotListed.selector, address(nftMock), badTokenId);
+        
+        console2.logBytes(expectedRevert);
+        vm.recordLogs();  // Start recording logs
+        try nftMarketplace.buyItem{value: price}(address(nftMock), badTokenId) {
+            revert("Should have reverted");
+        } catch (bytes memory actualRevert) {
+            console2.log("Actual revert:");
+            console2.logBytes(actualRevert);
+        }
+
         vm.deal(buyer, price);
         vm.prank(buyer);
         vm.expectRevert(
@@ -259,9 +274,27 @@ abstract contract BaseTest is Test {
 
         vm.deal(buyer, badPrice);
         vm.prank(buyer);
+        // console2.logString("HELLO");
+        // console2.logBytes4(NftMarketplace.NftMarketplace__PriceNotMet.selector);
+
+        // bytes memory expectedRevert = abi.encodeWithSelector(
+        //     NftMarketplace.NftMarketplace__PriceNotMet.selector,
+        //     address(nftMock),
+        //     STARTING_TOKEN_ID,
+        //     price
+        // );
+        
+        // console2.logBytes(expectedRevert);
+        // vm.recordLogs();  // Start recording logs
+        // try nftMarketplace.buyItem{value: badPrice}(address(nftMock), STARTING_TOKEN_ID) {
+        //     revert("Should have reverted");
+        // } catch (bytes memory actualRevert) {
+        //     console2.log("Actual revert:");
+        //     console2.logBytes(actualRevert);
+        // }
         vm.expectRevert(
             abi.encodeWithSelector(
-                NftMarketplace.NftMarketplace__PriceNotMet.selector, address(nftMock), STARTING_TOKEN_ID, price
+                NftMarketplace.NftMarketplace__PriceNotMet.selector,address(nftMock),STARTING_TOKEN_ID,price
             )
         );
         nftMarketplace.buyItem{value: badPrice}(address(nftMock), STARTING_TOKEN_ID);
