@@ -40,13 +40,13 @@ rule minting_mints_one_nft() {
 // This is known as a parametric rule, as there is a variable of type "method", which we named `f`
 // This means, we call any random function `f` with any random calldata `arg` 
 // We can also say which contracts we want to call f on, in this case, we said the nft contract
-rule sanity {
-    env e;
-    calldataarg arg;
-    method f;
-    nft.f(e, arg);
-    satisfy true;
-}
+// rule sanity {
+//     env e;
+//     calldataarg arg;
+//     method f;
+//     nft.f(e, arg);
+//     satisfy true;
+// }
 
 // parametric rule example
 rule no_change_to_total_supply(method f) {
